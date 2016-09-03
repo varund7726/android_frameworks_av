@@ -487,7 +487,7 @@ public:
 
     virtual status_t allocateSecureBuffer(
             node_id node, OMX_U32 port_index, size_t size,
-            buffer_id *buffer, void **buffer_data, sp<NativeHandle> *native_handle) {
+            buffer_id *buffer, void **buffer_data, native_handle_t **native_handle) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
         data.writeInt32((int32_t)node);
@@ -506,8 +506,7 @@ public:
         *buffer = (buffer_id)reply.readInt32();
         *buffer_data = (void *)reply.readInt64();
         if (*buffer_data == NULL) {
-            *native_handle = NativeHandle::create(
-                    reply.readNativeHandle(), true /* ownsHandle */);
+            *native_handle = reply.readNativeHandle();
         } else {
             *native_handle = NULL;
         }
@@ -1106,7 +1105,7 @@ status_t BnOMX::onTransact(
 
             buffer_id buffer;
             void *buffer_data = NULL;
-            sp<NativeHandle> native_handle;
+            native_handle_t *native_handle = NULL;
             status_t err = allocateSecureBuffer(
                     node, port_index, size, &buffer, &buffer_data, &native_handle);
             reply->writeInt32(err);
@@ -1115,7 +1114,7 @@ status_t BnOMX::onTransact(
                 reply->writeInt32((int32_t)buffer);
                 reply->writeInt64((uintptr_t)buffer_data);
                 if (buffer_data == NULL) {
-                    reply->writeNativeHandle(native_handle == NULL ? NULL : native_handle->handle());
+                    reply->writeNativeHandle(native_handle);
                 }
             }
 
