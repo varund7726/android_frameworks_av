@@ -910,6 +910,7 @@ Status CameraService::getLegacyParametersLazy(int cameraId,
 
 // Can camera service trust the caller based on the calling UID?
 static bool isTrustedCallingUid(uid_t uid) {
+	(void)uid;
     return true;
 }
 
